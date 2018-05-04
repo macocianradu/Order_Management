@@ -1,5 +1,6 @@
 package Presentation;
 
+import BusinessLogic.ClientBLL;
 import DataAcces.ClientDAO;
 import DataAcces.OrderDAO;
 import DataAcces.ProductDAO;
@@ -258,8 +259,7 @@ public class GUI {
         create.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Client c = new Client(ClientDAO.getNextId(), name.getText(), Integer.valueOf(budget.getText()), Integer.valueOf(age.getText()), email.getText(), address.getText());
-                ClientValidator.validate(c);
-                ClientDAO.insert(c);
+                ClientBLL.insertClient(c);
                 clientWindow(c.getIdClient());
             }
         });

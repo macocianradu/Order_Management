@@ -1,5 +1,6 @@
 package Presentation;
 
+import BusinessLogic.OrderBLL;
 import DataAcces.ClientDAO;
 import DataAcces.OrderDAO;
 import DataAcces.ProductDAO;
@@ -96,24 +97,7 @@ public class CreateOrder {
                 int nextId = OrderDAO.getNextId();
                 Product product = ProductDAO.findById(Integer.valueOf(productID.getText()));
                 Order order = new Order(clientID, nextId, Integer.valueOf(productID.getText()), Integer.valueOf(quantity.getText()));
-                OrderValidator.Validate(client, product, Integer.valueOf(quantity.getText()));
-                product.setStock(product.getStock() - Integer.valueOf(quantity.getText()));
-                client.setBudget(client.getBudget() - product.getPrice() * Integer.valueOf(quantity.getText()));
-                ProductDAO.edit(product);
-                ClientDAO.edit(client);
-                PrintWriter writer = null;
-                try {
-                    writer = new PrintWriter("bill.txt", "UTF-8");
-                } catch (FileNotFoundException e1) {
-                    e1.printStackTrace();
-                } catch (UnsupportedEncodingException e1) {
-                    e1.printStackTrace();
-                }
-                writer.println("name: " + client.getName());
-                writer.println("address: " + client.getAddress());
-                writer.println("amount: " + product.getPrice() * Integer.valueOf(quantity.getText()) + "$");
-                writer.close();
-                OrderDAO.insert(order);
+                OrderBLL.insertOrder(client, product, order.getQuantity(), order);
                 frame.dispose();
             }
         });
