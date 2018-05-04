@@ -5,22 +5,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import Model.Product;
 
-/**
- * @Author: Technical University of Cluj-Napoca, Romania Distributed Systems
- *          Research Laboratory, http://dsrl.coned.utcluj.ro/
- * @Since: Apr 03, 2017
- */
 public class ProductDAO {
 
     protected static final Logger LOGGER = Logger.getLogger(ProductDAO.class.getName());
     private static final String insertStatementString = "INSERT INTO product (name,stock,price)"
             + " VALUES (?,?,?)";
-    private final static String findStatementString = "SELECT * FROM product where id = ?";
+    private final static String findStatementString = "SELECT * FROM product where idProduct = ?";
+    private static final String deleteStatementString = "DELETE FROM order WHERE idProduct = ?";
+
 
     public static Product findById(int productId) {
         Product toReturn = null;
@@ -39,7 +37,7 @@ public class ProductDAO {
             int price = rs.getInt("price");
             toReturn = new Product(productId, name, stock, price);
         } catch (SQLException e) {
-            LOGGER.log(Level.WARNING,"StudentDAO:findById " + e.getMessage());
+            LOGGER.log(Level.WARNING,"ProductDAO:findById " + e.getMessage());
         } finally {
             ConnectionFactory.close(rs);
             ConnectionFactory.close(findStatement);
@@ -71,5 +69,75 @@ public class ProductDAO {
             ConnectionFactory.close(dbConnection);
         }
         return insertedId;
+    }
+
+    public static void edit(Product product){
+        Connection dbConnection = ConnectionFactory.getConnection();
+        PreparedStatement editStatement = null;
+        try {
+            editStatement = dbConnection.prepareStatement("UPDATE product SET name=?, price=?, stock=? WHERE idProduct=?");
+            editStatement.setString(1, product.getName());
+            editStatement.setInt(2, product.getPrice());
+            editStatement.setInt(3, product.getStock());
+            editStatement.setInt(4, product.getIdProduct());
+            editStatement.executeUpdate();
+        } catch (SQLException e){
+            LOGGER.log(Level.WARNING, "ProductDAO:edit " + e.getMessage());
+        } finally {
+            ConnectionFactory.close(editStatement);
+            ConnectionFactory.close(dbConnection);
+        }
+    }
+
+    public static ArrayList<Product> extractAll(){
+        Connection dbConnection = ConnectionFactory.getConnection();
+
+        ArrayList<Product> result = new ArrayList<Product>();
+        PreparedStatement extract = null;
+        ResultSet rs = null;
+        try{
+            extract = dbConnection.prepareStatement("SELECT * FROM product");
+            rs = extract.executeQuery();
+            while(rs.next()) {
+                result.add(new Product(rs.getInt("idProduct"), rs.getString("name"), rs.getInt("stock"), rs.getInt("price")));
+            }
+        } catch (SQLException e){
+            LOGGER.log(Level.WARNING,"ProductDAO:extract " + e.getMessage());
+        } finally {
+            ConnectionFactory.close(rs);
+            ConnectionFactory.close(extract);
+            ConnectionFactory.close(dbConnection);
+        }
+        return result;
+    }
+
+    public static int getNextId(){
+        ArrayList<Product> products;
+        products = extractAll();
+        int max = -1;
+        if(products.isEmpty()){
+            return 0;
+        }
+        for(Product p:products){
+            if(p.getIdProduct() > max){
+                max = p.getIdProduct();
+            }
+        }
+        return max + 1;
+    }
+
+    public static void delete(Product product){
+        Connection dbConnection = ConnectionFactory.getConnection();
+        PreparedStatement deleteStatement = null;
+        try {
+            deleteStatement = dbConnection.prepareStatement(deleteStatementString);
+            deleteStatement.setInt(1, product.getIdProduct());
+            deleteStatement.executeUpdate();
+        } catch (SQLException e){
+            LOGGER.log(Level.WARNING, "ProductDAO:delete " + e.getMessage());
+        } finally {
+            ConnectionFactory.close(deleteStatement);
+            ConnectionFactory.close(dbConnection);
+        }
     }
 }
