@@ -1,22 +1,16 @@
 package Presentation;
 
 import BusinessLogic.OrderBLL;
-import DataAcces.ClientDAO;
-import DataAcces.OrderDAO;
-import DataAcces.ProductDAO;
+import BusinessLogic.ProductBLL;
 import Model.Client;
 import Model.Order;
 import Model.Product;
-import Validation.OrderValidator;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class CreateOrder {
@@ -69,14 +63,14 @@ public class CreateOrder {
         c.gridy ++;
         c.gridx = 0;
         c.gridwidth = 2;
-        ArrayList<Product> products = ProductDAO.extractAll();
+        ArrayList<Product> products = ProductBLL.extractAll();
         if(products.isEmpty()){
             panel.add(new Label("No products available"), c);
             c.gridy ++;
             panel.add(back, c);
         }
         else {
-            JTable availableProducts = GUI.createTable(ProductDAO.extractAll());
+            JTable availableProducts = GUI.createTable(ProductBLL.extractAll());
             panel.add(availableProducts, c);
             c.gridy++;
             c.gridwidth = 1;
@@ -94,8 +88,8 @@ public class CreateOrder {
         });
         add.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int nextId = OrderDAO.getNextId();
-                Product product = ProductDAO.findById(Integer.valueOf(productID.getText()));
+                int nextId = OrderBLL.getNextId();
+                Product product = ProductBLL.findProductById(Integer.valueOf(productID.getText()));
                 Order order = new Order(clientID, nextId, Integer.valueOf(productID.getText()), Integer.valueOf(quantity.getText()));
                 OrderBLL.insertOrder(client, product, order.getQuantity(), order);
                 frame.dispose();

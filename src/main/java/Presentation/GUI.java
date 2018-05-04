@@ -1,17 +1,12 @@
 package Presentation;
 
 import BusinessLogic.ClientBLL;
-import DataAcces.ClientDAO;
-import DataAcces.OrderDAO;
-import DataAcces.ProductDAO;
+import BusinessLogic.OrderBLL;
+import BusinessLogic.ProductBLL;
 import Model.Client;
 import Model.Order;
-import Model.Product;
-import Validation.ClientValidator;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -76,8 +71,8 @@ public class GUI {
         panel.add(seeOrders, c);
         c.gridx = 2;
         panel.add(seeProducts, c);
-        if(!ProductDAO.extractAll().isEmpty())
-            table = createTable(OrderDAO.extractAll());
+        if(!ProductBLL.extractAll().isEmpty())
+            table = createTable(OrderBLL.extractAll());
         tablePane = new JScrollPane(table);
         c.gridx = 0;
         c.gridy = 1;
@@ -107,7 +102,7 @@ public class GUI {
 
         seeOrders.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                table = createTable(OrderDAO.extractAll());
+                table = createTable(OrderBLL.extractAll());
                 panel.remove(tablePane);
                 tablePane = new JScrollPane(table);
                 tablePane.validate();
@@ -130,7 +125,7 @@ public class GUI {
         });
         seeProducts.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                table = createTable(ProductDAO.extractAll());
+                table = createTable(ProductBLL.extractAll());
                 panel.remove(tablePane);
                 tablePane = new JScrollPane(table);
                 tablePane.validate();
@@ -148,9 +143,9 @@ public class GUI {
         });
         removeOrder.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Order o = OrderDAO.findById(Integer.valueOf(orderID.getText()));
-                OrderDAO.delete(o);
-                table = createTable(OrderDAO.extractAll());
+                Order o = OrderBLL.findOrderById(Integer.valueOf(orderID.getText()));
+                OrderBLL.delete(o);
+                table = createTable(OrderBLL.extractAll());
                 panel.remove(tablePane);
                 tablePane = new JScrollPane(table);
                 tablePane.validate();
@@ -258,7 +253,7 @@ public class GUI {
         });
         create.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Client c = new Client(ClientDAO.getNextId(), name.getText(), Integer.valueOf(budget.getText()), Integer.valueOf(age.getText()), email.getText(), address.getText());
+                Client c = new Client(ClientBLL.getNextID(), name.getText(), Integer.valueOf(budget.getText()), Integer.valueOf(age.getText()), email.getText(), address.getText());
                 ClientBLL.insertClient(c);
                 clientWindow(c.getIdClient());
             }
@@ -295,12 +290,16 @@ public class GUI {
     private void existClientWindow(){
         panel.removeAll();
         setDefaultConstraints(c);
+        final JTextField clientID = new JTextField();
+        JButton removeClient = new JButton("Remove Client");
         panel.add(new Label("Insert ID:"), c);
         final JTextField id = new JTextField("");
         JButton enter = new JButton("enter");
         JButton back = new JButton("back");
         back.setPreferredSize(exit.getPreferredSize());
         enter.setPreferredSize(exit.getPreferredSize());
+        table = createTable(ClientBLL.extractAll());
+        tablePane = new JScrollPane(table);
         c.gridx = 1;
         c.fill = GridBagConstraints.HORIZONTAL;
         panel.add(id, c);
@@ -310,8 +309,23 @@ public class GUI {
         c.gridy = 1;
         c.gridx = 0;
         c.gridwidth = 3;
-        panel.add(back, c);
-        c.gridy = 2;
+        c.gridheight = 2;
+        c.fill = GridBagConstraints.BOTH;
+        panel.add(tablePane, c);
+        c.gridy = 3;
+        c.gridheight = 1;
+        c.fill = GridBagConstraints.NONE;
+        c.gridwidth = 1;
+        panel.add(new Label("Client ID"), c);
+        c.gridx++;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(clientID, c);
+        c.gridx++;
+        c.fill = GridBagConstraints.NONE;
+        panel.add(removeClient, c);
+        c.gridwidth = 4;
+        c.gridy = 4;
+        c.gridx = 0;
         panel.add(exit, c);
         panel.validate();
         panel.repaint();
@@ -326,15 +340,22 @@ public class GUI {
                 clientWindow(Integer.valueOf(id.getText()));
             }
         });
+        removeClient.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ClientBLL.delete(Integer.valueOf(clientID.getText()));
+                existClientWindow();
+            }
+        });
     }
 
     private void clientWindow(int id){
         panel.removeAll();
+        JButton edit = new JButton("Edit Data");
         final Client client;
-        client = ClientDAO.findById(id);
+        client = ClientBLL.findClientById(id);
         JButton refresh = new JButton("Refresh");
         JButton addOrder = new JButton("Add Order");
-        ArrayList<Order> orders = ClientDAO.viewOrders(client);
+        ArrayList<Order> orders = ClientBLL.viewOrders(client);
         setDefaultConstraints(c);
         refresh.setPreferredSize(manager.getPreferredSize());
         addOrder.setPreferredSize(manager.getPreferredSize());
@@ -365,6 +386,8 @@ public class GUI {
         panel.add(addOrder, c);
         c.gridy ++;
         panel.add(refresh, c);
+        c.gridy ++;
+        panel.add(edit, c);
         c.gridy++;
         panel.add(exit, c);
         panel.validate();
@@ -378,7 +401,7 @@ public class GUI {
         refresh.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 panel.remove(tablePane);
-                table = createTable(ClientDAO.viewOrders(client));
+                table = createTable(ClientBLL.viewOrders(client));
                 tablePane = new JScrollPane(table);
                 tablePane.validate();
                 tablePane.repaint();
@@ -391,6 +414,11 @@ public class GUI {
                 panel.validate();
                 panel.repaint();
                 frame.pack();
+            }
+        });
+        edit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new EditClient(client);
             }
         });
     }

@@ -1,7 +1,6 @@
 package Presentation;
 
 import BusinessLogic.ProductBLL;
-import DataAcces.ProductDAO;
 import Model.Product;
 
 import javax.swing.*;
@@ -60,7 +59,7 @@ public class CreateProduct {
 
         addProduct.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Product p = new Product(ProductDAO.getNextId(), name.getText(), Integer.valueOf(quantity.getText()), Integer.valueOf(price.getText()));
+                Product p = new Product(ProductBLL.getNextId(), name.getText(), Integer.valueOf(quantity.getText()), Integer.valueOf(price.getText()));
                 ProductBLL.insertProduct(p);
             }
         });

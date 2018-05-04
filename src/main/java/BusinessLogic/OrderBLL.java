@@ -11,6 +11,7 @@ import Validation.OrderValidator;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 public class OrderBLL {
@@ -41,5 +42,17 @@ public class OrderBLL {
         ProductDAO.edit(product);
         ClientDAO.edit(client);
         return OrderDAO.insert(order);
+    }
+
+    public static int getNextId(){
+        return OrderDAO.getNextId();
+    }
+
+    public static ArrayList<Order> extractAll(){
+        return OrderDAO.extractAll();
+    }
+
+    public static void delete(Order o){
+        OrderDAO.delete(o);
     }
 }

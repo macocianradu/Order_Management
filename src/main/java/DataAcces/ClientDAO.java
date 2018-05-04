@@ -81,7 +81,7 @@ public class ClientDAO {
             extract = dbConnection.prepareStatement("SELECT * FROM client");
             rs = extract.executeQuery();
             while(rs.next()) {
-                result.add(new Client(rs.getInt("clientID"), rs.getString("name"), rs.getInt("budget"), rs.getInt("age"), rs.getString("email"), rs.getString("address")));
+                result.add(new Client(rs.getInt("idClient"), rs.getString("name"), rs.getInt("budget"), rs.getInt("age"), rs.getString("email"), rs.getString("address")));
             }
         } catch (SQLException e){
             LOGGER.log(Level.WARNING,"ClientDAO:extract " + e.getMessage());
@@ -158,12 +158,12 @@ public class ClientDAO {
         }
     }
 
-    public static void delete(Client client){
+    public static void delete(int id){
         Connection dbConnection = ConnectionFactory.getConnection();
 
         try {
             PreparedStatement deleteStatement = dbConnection.prepareStatement(deleteStatementString);
-            deleteStatement.setInt(1, client.getIdClient());
+            deleteStatement.setInt(1, id);
             deleteStatement.executeUpdate();
         } catch (SQLException e){
             LOGGER.log(Level.WARNING, "ClientDAO:delete " + e.getMessage());
