@@ -1,3 +1,0 @@
-name: asd
-address: asd
-amount: 5$
